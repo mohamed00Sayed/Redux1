@@ -1,0 +1,1 @@
+## A Simple Example of how Redux Works
