@@ -120,23 +120,43 @@
 	</script>
 	
 	<script type='text/babel'>
-		function List (props) {
-		  return (
-			<ul>
-			  {props.items.map((item) => (
-				<li key={item.id}>
-				  <span
-					onClick={() => props.toggle && props.toggle(item.id)}
-					style={{textDecoration: item.complete ? 'line-through' : 'none'}}>
-					  {item.name}
-				  </span>
-				  <button onClick={() => props.remove(item)}>
-					X
-				  </button>
-				</li>
-			  ))}
-			</ul>
-		  )
+		class List extends React.Component {
+		  componentDidMount () {
+			const { store } = this.props
+			store.subscribe(() => this.forceUpdate())
+		  }		
+		  render(){
+			  const { items, remove, toggle, store } = this.props
+			  const { todos, goals } = store.getState()
+			  return ( items === 'todos'?
+				<ul>
+				  {todos.map((item) => (
+					<li key={item.id}>
+					  <span
+						onClick={() => toggle && toggle(item.id)}
+						style={{textDecoration: item.complete ? 'line-through' : 'none'}}>
+						  {item.name}
+					  </span>
+					  <button onClick={() => remove(item)}>
+						X
+					  </button>
+					</li>
+				  ))}
+				</ul> : 
+				<ul>
+				  {goals.map((item) => (
+					<li key={item.id}>
+					  <span>
+						  {item.name}
+					  </span>
+					  <button onClick={() => remove(item)}>
+						X
+					  </button>
+					</li>
+				  ))}
+				</ul> 
+			  )
+		  }
 		}
 
 		class Todos extends React.Component {
@@ -170,7 +190,7 @@
 				  ref={(input) => this.input = input}
 				/>
 				<button onClick={this.addItem}>Add Todo</button>
-				<List items={this.props.todos} remove={this.removeItem} toggle={this.toggleItem}/>
+				<List items={'todos'} remove={this.removeItem} toggle={this.toggleItem} store={this.props.store}/>
 			  </div>
 			)
 		  }
@@ -203,26 +223,20 @@
 				/>
 				<button onClick={this.addItem}>Add Goal</button>
 
-				<List items={this.props.goals} remove={this.removeItem}/>
+				<List items={'goals'} remove={this.removeItem} store={this.props.store}/>
 			  </div>
 			)
 		  }
 		}
 
 		class App extends React.Component {
-		  componentDidMount () {
-			const { store } = this.props
-			
-			store.subscribe(() => this.forceUpdate())
-		  }
 		  render() {
 			const { store } = this.props
-			//console.log(store.getState())
-			const { todos, goals } = store.getState()		  
+			//console.log(store.getState())		  
 			return (
 			  <div>
-				<Todos todos={todos} store={this.props.store}/>
-				<Goals goals={goals} store={this.props.store}/>
+				<Todos  store={this.props.store}/>
+				<Goals  store={this.props.store}/>
 			  </div>
 			)
 		  }
